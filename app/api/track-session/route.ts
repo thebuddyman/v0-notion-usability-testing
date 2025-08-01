@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     console.log("Parsed request body:", body)
 
-    const { sessionId, pageId, action } = body
+    const { sessionId, pageId, action, hintClicks, stepCount } = body
 
     if (!action) {
       return NextResponse.json(
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     }
 
     // Dynamically import to avoid initialization errors
-    const { startSessionInNotion, updateSessionInNotion } = await import("@/lib/notion-analytics")
+    const { startSessionInNotion, updateSessionInNotion, updateHintClicksInNotion, updateStepViewsInNotion } = await import("@/lib/notion-analytics")
 
     switch (action) {
       case "start":
@@ -148,6 +148,56 @@ export async function POST(request: Request) {
         } catch (exitError) {
           console.error("Error updating to failed:", exitError)
           return NextResponse.json({ success: true }) // Don't fail on exit errors
+        }
+
+      case "update_hints":
+        console.log("=== UPDATING HINT CLICKS ===")
+        if (!pageId) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Missing pageId for update_hints action",
+            },
+            { status: 400 },
+          )
+        }
+        try {
+          await updateHintClicksInNotion(pageId, hintClicks || 0)
+          return NextResponse.json({ success: true })
+        } catch (hintsError) {
+          console.error("Error updating hint clicks:", hintsError)
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Failed to update hint clicks: ${hintsError instanceof Error ? hintsError.message : "Unknown error"}`,
+            },
+            { status: 500 },
+          )
+        }
+
+      case "update_steps":
+        console.log("=== UPDATING STEP VIEWS ===")
+        if (!pageId) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Missing pageId for update_steps action",
+            },
+            { status: 400 },
+          )
+        }
+        try {
+          await updateStepViewsInNotion(pageId, stepCount || 1)
+          return NextResponse.json({ success: true })
+        } catch (stepsError) {
+          console.error("Error updating step views:", stepsError)
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Failed to update step views: ${stepsError instanceof Error ? stepsError.message : "Unknown error"}`,
+            },
+            { status: 500 },
+          )
         }
 
       default:

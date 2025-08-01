@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, Clock, Users, RefreshCw, TrendingUp, AlertCircle } from "lucide-react"
+import { CheckCircle, XCircle, Clock, Users, RefreshCw, TrendingUp, AlertCircle, Info } from "lucide-react"
 
 type AnalyticsData = {
   summary: {
@@ -22,6 +22,8 @@ type AnalyticsData = {
     startTime: string
     endTime: string
     timeOnTask: number
+    hintClicks: number
+    stepViews: number
   }>
   error?: string
   message?: string
@@ -32,6 +34,7 @@ export default function MetricsPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showTooltip, setShowTooltip] = useState(false)
 
   const fetchAnalytics = async () => {
     try {
@@ -114,7 +117,29 @@ export default function MetricsPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="mb-8 text-center">
+        <div className="mb-8 text-center relative">
+          {/* <div className="absolute top-0 right-0">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setShowTooltip(!showTooltip)}
+              onBlur={() => setTimeout(() => setShowTooltip(false), 150)}
+            >
+              <Info className="h-5 w-5" />
+            </Button>
+            {showTooltip && (
+              <div className="absolute right-0 top-12 w-80 p-4 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-10">
+                <div className="mb-2 font-semibold">📊 Analytics Dashboard</div>
+                <ul className="space-y-1 text-xs">
+                  <li>• View real-time usability testing results</li>
+                  <li>• Track success rates and completion times</li>
+                  <li>• Each session gets a funny name for easy identification</li>
+                  <li>• Data is automatically stored in Notion</li>
+                  <li>• Click "Refresh Data" to see the latest results</li>
+                </ul>
+              </div>
+            )}
+          </div> */}
           <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
           <p className="text-gray-500 mt-2">User session analytics stored in Notion with funny names!</p>
           <Button
@@ -216,6 +241,8 @@ export default function MetricsPage() {
                         </div>
                         <div className="flex items-center space-x-4">
                           <span className="text-sm text-gray-500">{formatTime(session.timeOnTask)}</span>
+                          <span className="text-sm text-blue-600">💡 {session.hintClicks}</span>
+                          <span className="text-sm text-green-600">📍 {session.stepViews}/4</span>
                           {getStatusBadge(session.taskSuccess)}
                         </div>
                       </div>

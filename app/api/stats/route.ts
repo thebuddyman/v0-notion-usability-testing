@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { getStatsOptimized } from "@/lib/notion"
+import { getAnalytics } from "@/lib/notion-analytics"
 
 export async function GET() {
   try {
-    const stats = await getStatsOptimized()
+    const stats = await getAnalytics()
     return NextResponse.json(stats)
   } catch (error) {
     console.error("Error fetching stats:", error)
